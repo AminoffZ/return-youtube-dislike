@@ -7,7 +7,7 @@ function getButtons() {
     let elements = document.querySelectorAll(
       isMobile()
         ? "ytm-like-button-renderer"
-        : "#like-button > ytd-like-button-renderer"
+        : "ytd-segmented-like-dislike-button-renderer"
     );
     for (let element of elements) {
       //Youtube Shorts can have multiple like/dislike buttons when scrolling through videos
