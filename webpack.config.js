@@ -98,6 +98,11 @@ module.exports = {
               destination: "./Extensions/combined/dist/safari/",
             },
           ],
+          delete: [
+            {
+              source: "./Extensions/combined/dist/**.js",
+            },
+          ],
         },
       },
     }),
