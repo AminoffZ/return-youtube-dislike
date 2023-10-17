@@ -1,8 +1,35 @@
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const FileManagerPlugin = require("filemanager-webpack-plugin");
+const fs = require("fs");
 
 const entries = ["ryd.content-script", "ryd.background", "popup"];
+const banner = `
+// ==UserScript==
+// @name         Return YouTube Dislike
+// @namespace    https://www.returnyoutubedislike.com/
+// @homepage     https://www.returnyoutubedislike.com/
+// @version      3.1.2
+// @encoding     utf-8
+// @description  Return of the YouTube Dislike, Based off https://www.returnyoutubedislike.com/
+// @icon         https://github.com/Anarios/return-youtube-dislike/raw/main/Icons/Return%20Youtube%20Dislike%20-%20Transparent.png
+// @author       Anarios & JRWR
+// @match        *://*.youtube.com/*
+// @exclude      *://music.youtube.com/*
+// @exclude      *://*.music.youtube.com/*
+// @compatible   chrome
+// @compatible   firefox
+// @compatible   opera
+// @compatible   safari
+// @compatible   edge
+// @downloadURL  https://github.com/Anarios/return-youtube-dislike/raw/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js
+// @updateURL    https://github.com/Anarios/return-youtube-dislike/raw/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js
+// @grant        GM.xmlHttpRequest
+// @connect      youtube.com
+// @grant        GM_addStyle
+// @run-at       document-end
+// ==/UserScript==
+`;
 
 const ignorePatterns = [
   "**/manifest-**",
@@ -97,6 +124,11 @@ module.exports = {
               source: "./Extensions/combined/dist/**.js",
               destination: "./Extensions/combined/dist/safari/",
             },
+            {
+              source: "./Extensions/combined/dist/ryd.content-script.js",
+              destination:
+                "./Extensions/combined/dist/UserScript/Return Youtube Dislike.user.js",
+            },
           ],
           delete: [
             {
@@ -106,5 +138,28 @@ module.exports = {
         },
       },
     }),
+    {
+      apply: (compiler) => {
+        compiler.hooks.afterEmit.tapAsync(
+          "PrependBannerPlugin",
+          (compilation, callback) => {
+            const userScript = path.resolve(
+              __dirname,
+              "./Extensions/combined/dist/UserScript/Return Youtube Dislike.user.js"
+            );
+            console.log(userScript);
+            if (fs.existsSync(userScript)) {
+              console.log("Writing banner to", userScript);
+              const originalContent = fs.readFileSync(userScript, "utf-8");
+              fs.writeFileSync(userScript, banner + originalContent);
+            } else {
+              console.error("File does not exist", userScript);
+            }
+
+            callback();
+          }
+        );
+      },
+    },
   ],
 };
